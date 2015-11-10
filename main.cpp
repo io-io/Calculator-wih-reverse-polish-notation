@@ -121,6 +121,7 @@ int main() {
     string post=postfix("input.txt"/*, &dict[0][0]*/);
     //cout<<post<<endl;
     cout<<post<<endl;
+    cout<<post<<endl;
 
     system("pause");
 
