@@ -1,10 +1,23 @@
+/*Написать калькулятор выражений, в которых используются переменные и
+целые числа. В выражениях допустимы скобки любого уровня вложенности.
+Множество допустимых операций: +, -, *, /, ^. Исходное выражение
+считывается из входного файла, результат выводится в выходной файл.
+Целочисленные значения переменных спросить у пользователя. Табличку
+заданных значений переменных также вывести в файл.*/
+
 #include <iostream>
 #include <fstream>
 #include <iostream>
 #include <cstddef>
+#include <iomanip>
 
 
 using namespace std;
+
+struct dict {
+    char variable;
+    int value;
+};
 
 struct stack{
     char info;
@@ -26,8 +39,8 @@ char pop(stack* &st){
     return out;
 }
 
-string postfix(string file/*, char* dict[30][2]*/) {
-    string out = "";
+string postfix(string file, dict dictionary[]) {
+    string out = "";//постфиксная запись хранится здесь
     ifstream input(file);
     if (!input.is_open()) {
         cout << "File is not found.";
@@ -35,70 +48,72 @@ string postfix(string file/*, char* dict[30][2]*/) {
     } else {
         string infix;
         input >> infix;
-        int end = infix.length() - 1;
-        if (!((infix[end] >= 'a') || (infix[end] <= 'z') || (infix[end] == '(') || (infix[end] == ')'))) {
-            cout << "The last symbol must be a number." << endl;
+        int end = infix.length() - 1;//последний элемент слова
+        if (!((infix[end] >= 'a') || (infix[end] <= 'z') || (infix[end] == '(') || (infix[end] == ')') ||
+              (infix[end] >= '0') || (infix[end] <= '9'))) {
+            cout << "The last symbol must be a number or a letter." << endl;
             system("pause");
             return 0;
         }
-        int left = 0;
-        int right = 0;
+        int LeftBracket = 0;
+        int RightBracket = 0;
         for (int i = 0; i <= end; i++) {
             if (infix[i] == '(') {
-                left++;
+                LeftBracket++;
             } else if (infix[i] == ')') {
-                right++;
+                RightBracket++;
             }
         }
-        if (left != right) {
+        if (LeftBracket != RightBracket) {
             cout << "Number of opening brackets and closing ones is unequal." << endl;
             system("pause");
             return 0;
         }
         stack *top;
-        top->info='x';
-        int NumberOfLetters=0;
+        push(top, 'X');//метка того, что стек закончился
+        int NumberOfVariables = 0;//число переменных в инфиксной записи
 
-        for (int num = 0; num <= end; num++) {
-            if ((infix[num] >= 'a') && (infix[num] <= 'z')) {
-                out += infix[num];
-                /*bool contains=false;
-                for (int i=1; i<=NumberOfLetters; i++){
-                    if (infix[num]==*dict[i][1]){
+        for (int letter = 0; letter <= end; letter++) {
+            if ((infix[letter] >= 'a') && (infix[letter] <= 'z')) {
+                out += infix[letter];
+                bool contains = false;
+                for (int i = 1; i <= NumberOfVariables; i++) {
+                    if (infix[letter] == dictionary[i].variable) {
                         contains=true;
+                        break;
                     }}
                     if (!contains){
-                        *dict[NumberOfLetters+1][1]=infix[num];
-                        NumberOfLetters++;
-                    }*/
+                        dictionary[NumberOfVariables + 1].variable = infix[letter];
+                        NumberOfVariables++;
+                    }
             }else {
-            switch (infix[num]) {
+                switch (infix[letter]) {
                 case '^':
                     while ((top->info == '^')) {
-                        out += infix[num];
+                        out += infix[letter];
                     }
-                    push(top, infix[num]);
+                        push(top, infix[letter]);
                     break;
                 case '*':
                     while ((top->info == '/') || (top->info == '*') || (top->info == '^')) {
                         out += pop(top);
                     }
-                    push(top, infix[num]);
+                        push(top, infix[letter]);
                     break;
                 case '/':
                     while ((top->info == '/') || (top->info == '*') || (top->info == '^')) {
                         out += pop(top);
                     }
-                    push(top, infix[num]);
+                        push(top, infix[letter]);
                     break;
                 case '+':
-                    push(top, infix[num]);
+                    push(top, infix[letter]);
                     break;
                 case '-':
-                    push(top, infix[num]);
+                    push(top, infix[letter]);
                     break;
                 case '(':
-                    push(top, infix[num]);
+                    push(top, infix[letter]);
                     break;
                 case ')':
                     while (top->info != '(') {
@@ -108,19 +123,38 @@ string postfix(string file/*, char* dict[30][2]*/) {
                     break;
             }}
         }
-        while (top->info!='x'){
+        while (top->info != 'X') {
             out += pop(top);
         }
+        dictionary[0].variable = NumberOfVariables;
     }
     return out;
 }
 
-
 int main() {
-    /*char dict[30][2]={' '};*/
-    string post=postfix("input.txt"/*, &dict[0][0]*/);
-    //cout<<post<<endl;
-    cout<<post<<endl;
+    dict dictionary[30];
+    string post = postfix("input.txt", &dictionary[30]);
+    for (int i = 1; i <= dictionary[0].value; i++) {
+        cout << "Enter variable " << dictionary[i].variable << ":";
+        cin >> dictionary[i].value;
+    }
+    ofstream output;
+    output.open("output.txt");
+
+    //выводим переменные первой строкой
+    for (int i = 1; i <= dictionary[0].value; i++) {
+        output << setw(4);
+        output << left;
+        output << dictionary[i].variable;
+    }
+    output << " " << endl;//переходим на следующую строку
+    //выводим значения переменных второй строкой
+    for (int i = 1; i <= dictionary[0].value; i++) {
+        output << setw(4);
+        output << left;
+        output << dictionary[i].variable;
+    }
+
     cout<<post<<endl;
 
     system("pause");
