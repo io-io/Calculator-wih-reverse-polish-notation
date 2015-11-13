@@ -24,7 +24,13 @@ struct stack{
     struct stack *next;
 };
 
-void push(stack* &st, char symbol){
+struct stackInt {
+    int info;
+    struct stack *next;
+};
+
+template<class T>
+void push(stack *&st, T symbol) {
     stack *top=new(stack);
     top->info=symbol;
     top->next=st;
@@ -136,7 +142,6 @@ string postfix(string file, dict dictionary[]) {
 
 int calculate(string postfix, dict dictionary[]) {
     stack *top;
-    //push(top, 'X');
 
     int end = postfix.length() - 1;//последний элемент слова
     for (int i = 0; i <= end; i++) {
@@ -149,8 +154,10 @@ int calculate(string postfix, dict dictionary[]) {
         } else if ((postfix[i] >= '0') && (postfix[i] <= '9')) {
             push(top, postfix[i]);
         } else {
-            int OperandLast = pop(top);//операнд, стоящий вторым в постфиксной записи
-            int OperandFirst = pop(top);//операнд, стоящий первым в постфиксной записи
+            char inter = pop(top);
+            int OperandLast = atoi(&inter);//операнд, стоящий вторым в постфиксной записи
+            inter = pop(top);
+            int OperandFirst = atoi(&inter);//операнд, стоящий первым в постфиксной записи
             switch (postfix[i]) {
                 case '^':
                     push(top, pow(OperandFirst, OperandLast));
@@ -159,10 +166,16 @@ int calculate(string postfix, dict dictionary[]) {
                     push(top, OperandFirst * OperandLast);
                     break;
                 case '/':
+                    if (OperandLast == 0) {
+                        cout << "You can`t divide by 0" << endl;
+                        exit;
+                    }
                     push(top, OperandFirst / OperandLast);
                     break;
                 case '+':
-                    push(top, OperandFirst + OperandLast);
+                    int intermedium = OperandFirst + OperandLast;
+                    cout << intermedium << endl;
+                    push(top, intermedium);
                     break;
                 case '-':
                     push(top, OperandFirst - OperandLast);
@@ -203,8 +216,7 @@ int main() {
 
     output << " " << endl;
     output << " " << endl;
-    cout << post;
-
+    cout << post << endl;
 
     output << calculate(post, dictionary);
 
