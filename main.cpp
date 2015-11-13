@@ -29,17 +29,18 @@ struct stackInt {
     struct stack *next;
 };
 
-template<class T>
-void push(stack *&st, T symbol) {
-    stack *top=new(stack);
+template<class TemplateStack, class T>
+void push(TemplateStack *&st, T symbol) {
+    TemplateStack *top = new(TemplateStack);
     top->info=symbol;
     top->next=st;
     st=top;
 }
 
-char pop(stack* &st){
-    char out=st->info;
-    stack *inter=new(stack);
+template<class TemplateStack, class T>
+T pop(TemplateStack *&st, T) {
+    T out = st->info;
+    TemplateStack *inter = new(TemplateStack);
     inter=st->next;
     st=inter;
     return out;
@@ -105,7 +106,7 @@ string postfix(string file, dict dictionary[]) {
                     break;
                 case '*':
                     while ((top->info == '/') || (top->info == '*') || (top->info == '^')) {
-                        out += pop(top);
+                        out += pop(top, int);
                     }
                         push(top, infix[letter]);
                     break;
@@ -141,7 +142,7 @@ string postfix(string file, dict dictionary[]) {
 }
 
 int calculate(string postfix, dict dictionary[]) {
-    stack *top;
+    stackInt *top;
 
     int end = postfix.length() - 1;//последний элемент слова
     for (int i = 0; i <= end; i++) {
@@ -218,7 +219,7 @@ int main() {
     output << " " << endl;
     cout << post << endl;
 
-    output << calculate(post, dictionary);
+    //  output << calculate(post, dictionary);
 
     system("pause");
 
