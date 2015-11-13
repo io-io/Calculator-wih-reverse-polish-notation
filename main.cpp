@@ -7,7 +7,7 @@
 
 #include <iostream>
 #include <fstream>
-#include <iostream>
+#include <math.h>
 #include <cstddef>
 #include <iomanip>
 
@@ -76,6 +76,7 @@ string postfix(string file, dict dictionary[]) {
         for (int letter = 0; letter <= end; letter++) {
             if ((infix[letter] >= 'a') && (infix[letter] <= 'z')) {
                 out += infix[letter];
+                //просматриваем на вхождение этой переменной в словаре
                 bool contains = false;
                 for (int i = 1; i <= NumberOfVariables; i++) {
                     if (infix[letter] == dictionary[i].variable) {
@@ -86,6 +87,8 @@ string postfix(string file, dict dictionary[]) {
                         dictionary[NumberOfVariables + 1].variable = infix[letter];
                         NumberOfVariables++;
                     }
+            } else if ((infix[letter] >= '0') && (infix[letter] <= '9')) {
+                out += infix[letter];
             }else {
                 switch (infix[letter]) {
                 case '^':
@@ -126,18 +129,61 @@ string postfix(string file, dict dictionary[]) {
         while (top->info != 'X') {
             out += pop(top);
         }
-        dictionary[0].variable = NumberOfVariables;
+        dictionary[0].value = NumberOfVariables;
     }
+    return out;
+}
+
+int calculate(string postfix, dict dictionary[]) {
+    stack *top;
+    //push(top, 'X');
+
+    int end = postfix.length() - 1;//последний элемент слова
+    for (int i = 0; i <= end; i++) {
+        if ((postfix[i] >= 'a') && (postfix[i] <= 'z')) {
+            int j = 0;
+            while (postfix[i] != dictionary[j].variable) {
+                j++;
+            }
+            push(top, dictionary[j].value);
+        } else if ((postfix[i] >= '0') && (postfix[i] <= '9')) {
+            push(top, postfix[i]);
+        } else {
+            int OperandLast = pop(top);//операнд, стоящий вторым в постфиксной записи
+            int OperandFirst = pop(top);//операнд, стоящий первым в постфиксной записи
+            switch (postfix[i]) {
+                case '^':
+                    push(top, pow(OperandFirst, OperandLast));
+                    break;
+                case '*':
+                    push(top, OperandFirst * OperandLast);
+                    break;
+                case '/':
+                    push(top, OperandFirst / OperandLast);
+                    break;
+                case '+':
+                    push(top, OperandFirst + OperandLast);
+                    break;
+                case '-':
+                    push(top, OperandFirst - OperandLast);
+                    break;
+            }
+        }
+    }
+    int out = pop(top);
     return out;
 }
 
 int main() {
     dict dictionary[30];
-    string post = postfix("input.txt", &dictionary[30]);
+///СПРОСИ КАК ПРАВИЛЬНО НАЗЫВАТЬ  ИТЕРАТОРЫ(СЧЁТЧИКИ)
+    string post = postfix("input.txt", dictionary);
+
     for (int i = 1; i <= dictionary[0].value; i++) {
         cout << "Enter variable " << dictionary[i].variable << ":";
         cin >> dictionary[i].value;
     }
+
     ofstream output;
     output.open("output.txt");
 
@@ -152,10 +198,15 @@ int main() {
     for (int i = 1; i <= dictionary[0].value; i++) {
         output << setw(4);
         output << left;
-        output << dictionary[i].variable;
+        output << dictionary[i].value;
     }
 
-    cout<<post<<endl;
+    output << " " << endl;
+    output << " " << endl;
+    cout << post;
+
+
+    output << calculate(post, dictionary);
 
     system("pause");
 
