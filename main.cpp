@@ -24,23 +24,21 @@ struct stack{
     struct stack *next;
 };
 
-struct stackInt {
+/*struct stackInt {
     int info;
     struct stack *next;
-};
+};*/
 
-template<class TemplateStack, class T>
-void push(TemplateStack *&st, T symbol) {
-    TemplateStack *top = new(TemplateStack);
+void push(stack *&st, char symbol) {
+    stack *top = new(stack);
     top->info=symbol;
     top->next=st;
     st=top;
 }
 
-template<class TemplateStack, class T>
-T pop(TemplateStack *&st, T) {
-    T out = st->info;
-    TemplateStack *inter = new(TemplateStack);
+char pop(stack *&st) {
+    char out = st->info;
+    stack *inter = new(stack);
     inter=st->next;
     st=inter;
     return out;
@@ -106,7 +104,7 @@ string postfix(string file, dict dictionary[]) {
                     break;
                 case '*':
                     while ((top->info == '/') || (top->info == '*') || (top->info == '^')) {
-                        out += pop(top, int);
+                        out += pop(top);
                     }
                         push(top, infix[letter]);
                     break;
@@ -142,7 +140,7 @@ string postfix(string file, dict dictionary[]) {
 }
 
 int calculate(string postfix, dict dictionary[]) {
-    stackInt *top;
+    stack *top;
 
     int end = postfix.length() - 1;//последний элемент слова
     for (int i = 0; i <= end; i++) {
@@ -159,32 +157,37 @@ int calculate(string postfix, dict dictionary[]) {
             int OperandLast = atoi(&inter);//операнд, стоящий вторым в постфиксной записи
             inter = pop(top);
             int OperandFirst = atoi(&inter);//операнд, стоящий первым в постфиксной записи
+
             switch (postfix[i]) {
                 case '^':
-                    push(top, pow(OperandFirst, OperandLast));
+                    itoa(pow(OperandFirst, OperandLast), &inter, 10);
+                    push(top, inter);
                     break;
                 case '*':
-                    push(top, OperandFirst * OperandLast);
+                    itoa(OperandFirst * OperandLast, &inter, 10);
+                    push(top, inter);
                     break;
                 case '/':
                     if (OperandLast == 0) {
-                        cout << "You can`t divide by 0" << endl;
+                        cout << "You can`t divide by 0." << endl;
                         exit;
                     }
-                    push(top, OperandFirst / OperandLast);
+                    itoa(OperandFirst / OperandLast, &inter, 10);
+                    push(top, inter);
                     break;
                 case '+':
-                    int intermedium = OperandFirst + OperandLast;
-                    cout << intermedium << endl;
-                    push(top, intermedium);
+                    itoa(OperandFirst + OperandLast, &inter, 10);
+                    push(top, inter);
                     break;
                 case '-':
-                    push(top, OperandFirst - OperandLast);
+                    itoa(OperandFirst - OperandLast, &inter, 10);
+                    push(top, inter);
                     break;
             }
         }
     }
-    int out = pop(top);
+    char preout = pop(top);
+    int out = atoi(&preout);
     return out;
 }
 
@@ -219,7 +222,7 @@ int main() {
     output << " " << endl;
     cout << post << endl;
 
-    //  output << calculate(post, dictionary);
+    output << calculate(post, dictionary);
 
     system("pause");
 
