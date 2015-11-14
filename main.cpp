@@ -24,27 +24,25 @@ struct stack{
     struct stack *next;
 };
 
-struct stackInt {
+/*struct stackInt {
     int info;
-    struct stackInt *next;
-};
+    struct stack *next;
+};*/
 
-template<class TemplateStack, class T>
-void push(TemplateStack *&st, T symbol) {
-    TemplateStack *top = new(TemplateStack);
+void push(stack *&st, char symbol) {
+    stack *top = new(stack);
     top->info=symbol;
     top->next=st;
     st=top;
 }
 
-template<class TemplateStack, class T>
-void pop(TemplateStack *&st, T &out) {
-    out = st->info;
-    TemplateStack *inter = new(TemplateStack);
+char pop(stack *&st) {
+    char out = st->info;
+    stack *inter = new(stack);
     inter=st->next;
     st=inter;
+    return out;
 }
-
 
 string postfix(string file, dict dictionary[]) {
     string out = "";//постфиксная запись хранится здесь
@@ -54,11 +52,9 @@ string postfix(string file, dict dictionary[]) {
         input.close();
     } else {
         string infix;
-        getline(input, infix);
-        infix += ' ';
+        input >> infix;
         int end = infix.length() - 1;//последний элемент слова
         if (!((infix[end] >= 'a') || (infix[end] <= 'z') || (infix[end] == '(') || (infix[end] == ')') ||
-              //проверка на последний элемент входнгой строки
               (infix[end] >= '0') || (infix[end] <= '9'))) {
             cout << "The last symbol must be a number or a letter." << endl;
             system("pause");
@@ -73,7 +69,7 @@ string postfix(string file, dict dictionary[]) {
                 RightBracket++;
             }
         }
-        if (LeftBracket != RightBracket) {//количество скобок должно быть равно
+        if (LeftBracket != RightBracket) {
             cout << "Number of opening brackets and closing ones is unequal." << endl;
             system("pause");
             return 0;
@@ -81,12 +77,10 @@ string postfix(string file, dict dictionary[]) {
         stack *top;
         push(top, 'X');//метка того, что стек закончился
         int NumberOfVariables = 0;//число переменных в инфиксной записи
-        char inter;
 
-        for (int letter = 0; letter <= end; letter += 2) {
+        for (int letter = 0; letter <= end; letter++) {
             if ((infix[letter] >= 'a') && (infix[letter] <= 'z')) {
                 out += infix[letter];
-                out += ' ';
                 //просматриваем на вхождение этой переменной в словаре
                 bool contains = false;
                 for (int i = 1; i <= NumberOfVariables; i++) {
@@ -99,40 +93,24 @@ string postfix(string file, dict dictionary[]) {
                         NumberOfVariables++;
                     }
             } else if ((infix[letter] >= '0') && (infix[letter] <= '9')) {
-                string numbers;
-                while ((infix[letter] >= '0') && (infix[letter] <= '9')) {
-                    numbers += infix[letter];
-                    letter++;
-                }
-                if (infix[letter] != ' ') {//элементы должны быть разделены только пробелом
-                    cout << "Elements must be separated only by spaces." << endl;
-                    system("pause");
-                    return 0;
-                }
-                out += numbers + ' ';
-                letter--;
-                continue;
+                out += infix[letter];
             }else {
                 switch (infix[letter]) {
                 case '^':
                     while ((top->info == '^')) {
-                        out += infix[letter] + ' ';
+                        out += infix[letter];
                     }
                         push(top, infix[letter]);
                     break;
                 case '*':
                     while ((top->info == '/') || (top->info == '*') || (top->info == '^')) {
-                        pop(top, inter);
-                        out += inter;
-                        out += ' ';
+                        out += pop(top);
                     }
                         push(top, infix[letter]);
                     break;
                 case '/':
                     while ((top->info == '/') || (top->info == '*') || (top->info == '^')) {
-                        pop(top, inter);
-                        out += inter;
-                        out += ' ';
+                        out += pop(top);
                     }
                         push(top, infix[letter]);
                     break;
@@ -147,18 +125,14 @@ string postfix(string file, dict dictionary[]) {
                     break;
                 case ')':
                     while (top->info != '(') {
-                        pop(top, inter);
-                        out += inter;
-                        out += ' ';
+                        out += pop(top);
                     }
-                        pop(top, inter);
+                    pop(top);
                     break;
             }}
         }
         while (top->info != 'X') {
-            pop(top, inter);
-            out += inter;
-            out += ' ';
+            out += pop(top);
         }
         dictionary[0].value = NumberOfVariables;
     }
@@ -166,10 +140,10 @@ string postfix(string file, dict dictionary[]) {
 }
 
 int calculate(string postfix, dict dictionary[]) {
-    stackInt *top;
+    stack *top;
 
     int end = postfix.length() - 1;//последний элемент слова
-    for (int i = 0; i <= end; i += 2) {
+    for (int i = 0; i <= end; i++) {
         if ((postfix[i] >= 'a') && (postfix[i] <= 'z')) {
             int j = 0;
             while (postfix[i] != dictionary[j].variable) {
@@ -177,54 +151,43 @@ int calculate(string postfix, dict dictionary[]) {
             }
             push(top, dictionary[j].value);
         } else if ((postfix[i] >= '0') && (postfix[i] <= '9')) {
-            char numbers[50] = {' '};
-            int j = 0;
-            while ((postfix[i] >= '0') && (postfix[i] <= '9')) {
-                numbers[j] = postfix[i];
-                i++;
-                j++;
-            }
-            //cout<<numbers<<endl;
-            push(top, atoi(numbers));
-            i--;
-            continue;
+            push(top, postfix[i]);
         } else {
-            int result;
-            int OperandLast;
-            pop(top, OperandLast);//операнд, стоящий вторым в постфиксной записи
-            int OperandFirst;
-            pop(top, OperandFirst);//операнд, стоящий первым в постфиксной записи
+            char inter = pop(top);
+            int OperandLast = atoi(&inter);//операнд, стоящий вторым в постфиксной записи
+            inter = pop(top);
+            int OperandFirst = atoi(&inter);//операнд, стоящий первым в постфиксной записи
 
             switch (postfix[i]) {
                 case '^':
-                    result = pow(OperandFirst, OperandLast);
-                    push(top, result);
+                    itoa(pow(OperandFirst, OperandLast), &inter, 10);
+                    push(top, inter);
                     break;
                 case '*':
-                    result = OperandFirst * OperandLast;
-                    push(top, result);
+                    itoa(OperandFirst * OperandLast, &inter, 10);
+                    push(top, inter);
                     break;
                 case '/':
                     if (OperandLast == 0) {
                         cout << "You can`t divide by 0." << endl;
-                        return 0;
+                        exit;
                     }
-                    result = OperandFirst / OperandLast;
-                    push(top, result);
+                    itoa(OperandFirst / OperandLast, &inter, 10);
+                    push(top, inter);
                     break;
                 case '+':
-                    result = OperandFirst + OperandLast;
-                    push(top, result);
+                    itoa(OperandFirst + OperandLast, &inter, 10);
+                    push(top, inter);
                     break;
                 case '-':
-                    result = OperandFirst - OperandLast;
-                    push(top, result);
+                    itoa(OperandFirst - OperandLast, &inter, 10);
+                    push(top, inter);
                     break;
             }
         }
     }
-    int out;
-    pop(top, out);
+    char preout = pop(top);
+    int out = atoi(&preout);
     return out;
 }
 
@@ -259,8 +222,8 @@ int main() {
     output << " " << endl;
     cout << post << endl;
 
-    output << "The result is: " << calculate(post, dictionary);
+    output << calculate(post, dictionary);
 
-    //system("pause");
+    system("pause");
 
 }
