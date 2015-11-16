@@ -55,12 +55,13 @@ string postfix(string file, dict dictionary[]) {
     } else {
         string infix;
         getline(input, infix);
-        infix += ' ';
+
         int end = infix.length() - 1;//последний элемент слова
-        if (!((infix[end] >= 'a') || (infix[end] <= 'z') || (infix[end] == '(') || (infix[end] == ')') ||
-              //проверка на последний элемент входнгой строки
-              (infix[end] >= '0') || (infix[end] <= '9'))) {
-            cout << "The last symbol must be a number or a letter." << endl;
+
+        if (!((infix[end] >= 'a') && (infix[end] <= 'z') || (infix[end] == '(') || (infix[end] == ')') ||
+              //проверка на последний элемент входной строки
+              (infix[end] >= '0') && (infix[end] <= '9'))) {
+            cout << "The last symbol must be a number or a letter or a bracket." << endl;
             system("pause");
             return 0;
         }
@@ -82,6 +83,8 @@ string postfix(string file, dict dictionary[]) {
         push(top, 'X');//метка того, что стек закончился
         int NumberOfVariables = 0;//число переменных в инфиксной записи
         char inter;
+
+        infix += ' ';//уловка для проверки на пробелы между словами
 
         for (int letter = 0; letter <= end; letter += 2) {
             if ((infix[letter] >= 'a') && (infix[letter] <= 'z')) {
