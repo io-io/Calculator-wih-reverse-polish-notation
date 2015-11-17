@@ -10,6 +10,7 @@
 #include <math.h>
 #include <cstddef>
 #include <iomanip>
+#include "IsNumber.h"
 
 
 using namespace std;
@@ -58,6 +59,12 @@ string postfix(string file, dict dictionary[]) {
 
         int end = infix.length() - 1;//последний элемент слова
 
+        if ((infix[0] == '(') && (infix[end] == ')')) {
+            cout << "USeless brackets on borders of infix notation." << endl;
+            system("pause");
+            return 0;
+        }
+
         if (!((infix[end] >= 'a') && (infix[end] <= 'z') || (infix[end] == '(') || (infix[end] == ')') ||
               //проверка на последний элемент входной строки
               (infix[end] >= '0') && (infix[end] <= '9'))) {
@@ -83,11 +90,23 @@ string postfix(string file, dict dictionary[]) {
         push(top, 'X');//метка того, что стек закончился
         int NumberOfVariables = 0;//число переменных в инфиксной записи
         char inter;
+        int NumberOfOperands = 0;//число операндов, т.е. количество переменных и чисел
+        int NumberOfOperators = 0;
 
         infix += ' ';//уловка для проверки на пробелы между словами
 
         for (int letter = 0; letter <= end; letter += 2) {
+            //проверка на последний элемент входной строки
+            if (!((infix[letter] >= 'a') && (infix[letter] <= 'z') ||
+                  (infix[letter] >= '(') && (infix[letter] <= '+') ||
+                  (infix[letter] >= '/') && (infix[letter] <= '9') || (infix[letter] == '-'))) {
+                cout << "The infix  notaion may consist only of numbers, english letters and brackets." << endl;
+                system("pause");
+                return 0;
+            }
+
             if ((infix[letter] >= 'a') && (infix[letter] <= 'z')) {
+                NumberOfOperands++;
                 out += infix[letter];
                 out += ' ';
                 //просматриваем на вхождение этой переменной в словаре
@@ -102,6 +121,7 @@ string postfix(string file, dict dictionary[]) {
                     NumberOfVariables++;
                 }
             } else if ((infix[letter] >= '0') && (infix[letter] <= '9')) {
+                NumberOfOperands++;
                 string numbers;
                 while ((infix[letter] >= '0') && (infix[letter] <= '9')) {
                     numbers += infix[letter];
@@ -114,16 +134,19 @@ string postfix(string file, dict dictionary[]) {
                 }
                 out += numbers + ' ';
                 letter--;
+
                 continue;
             }else {
                 switch (infix[letter]) {
                     case '^':
+                        NumberOfOperators++;
                         while ((top->info == '^')) {
                             out += infix[letter] + ' ';
                         }
                         push(top, infix[letter]);
                         break;
                     case '*':
+                        NumberOfOperators++;
                         while ((top->info == '/') || (top->info == '*') || (top->info == '^')) {
                             pop(top, inter);
                             out += inter;
@@ -132,6 +155,7 @@ string postfix(string file, dict dictionary[]) {
                         push(top, infix[letter]);
                         break;
                     case '/':
+                        NumberOfOperators++;
                         while ((top->info == '/') || (top->info == '*') || (top->info == '^')) {
                             pop(top, inter);
                             out += inter;
@@ -140,9 +164,11 @@ string postfix(string file, dict dictionary[]) {
                         push(top, infix[letter]);
                         break;
                     case '+':
+                        NumberOfOperators++;
                         push(top, infix[letter]);
                         break;
                     case '-':
+                        NumberOfOperators++;
                         push(top, infix[letter]);
                         break;
                     case '(':
@@ -156,7 +182,13 @@ string postfix(string file, dict dictionary[]) {
                         }
                         pop(top, inter);
                         break;
-                }}
+                }
+                if (NumberOfOperators > NumberOfOperands) {
+                    cout << "Number of operators is more then number of operands ." << endl;
+                    system("pause");
+                    return 0;
+                }
+            }
         }
         while (top->info != 'X') {
             pop(top, inter);
@@ -231,14 +263,21 @@ int calculate(string postfix, dict dictionary[]) {
     return out;
 }
 
+
 int main() {
     dict dictionary[30];
-///СПРОСИ КАК ПРАВИЛЬНО НАЗЫВАТЬ  ИТЕРАТОРЫ(СЧЁТЧИКИ)
+
     string post = postfix("input.txt", dictionary);
 
     for (int i = 1; i <= dictionary[0].value; i++) {
         cout << "Enter variable " << dictionary[i].variable << ":";
-        cin >> dictionary[i].value;
+        char inter;
+        cin >> inter;
+        while (!(IsNumber::IsNumber(&inter))) {
+            cout << "Variable can get only integer value." << endl;
+            cin >> inter;
+        }
+        dictionary[i].value = atoi(&inter);
     }
 
     ofstream output;

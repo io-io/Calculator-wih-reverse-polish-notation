@@ -1,0 +1,12 @@
+//
+// Created by user on 17.11.2015.
+//
+
+#ifndef CALCULATOR_WIH_REVERSE_POLISH_NOTATION_ISNUMBER_H
+#define CALCULATOR_WIH_REVERSE_POLISH_NOTATION_ISNUMBER_H
+
+namespace IsNumber {
+    bool IsNumber(char *Symbol);
+}
+
+#endif //CALCULATOR_WIH_REVERSE_POLISH_NOTATION_ISNUMBER_H
