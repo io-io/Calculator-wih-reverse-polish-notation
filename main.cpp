@@ -20,7 +20,7 @@ struct dict {
     int value;
 };
 
-struct stack{
+struct stack {
     char info;
     struct stack *next;
 };
@@ -33,17 +33,17 @@ struct stackInt {
 template<class TemplateStack, class T>
 void push(TemplateStack *&st, T symbol) {
     TemplateStack *top = new(TemplateStack);
-    top->info=symbol;
-    top->next=st;
-    st=top;
+    top->info = symbol;
+    top->next = st;
+    st = top;
 }
 
 template<class TemplateStack, class T>
 void pop(TemplateStack *&st, T &out) {
     out = st->info;
     TemplateStack *inter = new(TemplateStack);
-    inter=st->next;
-    st=inter;
+    inter = st->next;
+    st = inter;
 }
 
 
@@ -100,7 +100,9 @@ string postfix(string file, dict dictionary[]) {
             if (!((infix[letter] >= 'a') && (infix[letter] <= 'z') ||
                   (infix[letter] >= '(') && (infix[letter] <= '+') ||
                   (infix[letter] >= '/') && (infix[letter] <= '9') || (infix[letter] == '-'))) {
-                cout << "The infix  notaion may consist only of numbers, english letters and brackets." << endl;
+                cout <<
+                "The infix  notaion may contain only numbers, english letters and brackets on signifficant positions." <<
+                endl;
                 system("pause");
                 return 0;
             }
@@ -113,10 +115,11 @@ string postfix(string file, dict dictionary[]) {
                 bool contains = false;
                 for (int i = 1; i <= NumberOfVariables; i++) {
                     if (infix[letter] == dictionary[i].variable) {
-                        contains=true;
+                        contains = true;
                         break;
-                    }}
-                if (!contains){
+                    }
+                }
+                if (!contains) {
                     dictionary[NumberOfVariables + 1].variable = infix[letter];
                     NumberOfVariables++;
                 }
@@ -136,7 +139,7 @@ string postfix(string file, dict dictionary[]) {
                 letter--;
 
                 continue;
-            }else {
+            } else {
                 switch (infix[letter]) {
                     case '^':
                         NumberOfOperators++;
@@ -165,10 +168,22 @@ string postfix(string file, dict dictionary[]) {
                         break;
                     case '+':
                         NumberOfOperators++;
+                        while ((top->info == '/') || (top->info == '*') || (top->info == '^') || (top->info == '+') ||
+                               (top->info == '-')) {
+                            pop(top, inter);
+                            out += inter;
+                            out += ' ';
+                        }
                         push(top, infix[letter]);
                         break;
                     case '-':
                         NumberOfOperators++;
+                        while ((top->info == '/') || (top->info == '*') || (top->info == '^') || (top->info == '+') ||
+                               (top->info == '-')) {
+                            pop(top, inter);
+                            out += inter;
+                            out += ' ';
+                        }
                         push(top, infix[letter]);
                         break;
                     case '(':
