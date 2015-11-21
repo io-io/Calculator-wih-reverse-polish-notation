@@ -101,8 +101,8 @@ string postfix(string file, dict dictionary[]) {
                   (infix[letter] >= '(') && (infix[letter] <= '+') ||
                   (infix[letter] >= '/') && (infix[letter] <= '9') || (infix[letter] == '-'))) {
                 cout <<
-                "The infix  notaion may contain only numbers, english letters and brackets on signifficant positions." <<
-                endl;
+                    "The infix  notaion may contain only numbers, english letters and brackets on signifficant positions." <<
+                    endl;
                 system("pause");
                 return 0;
             }
