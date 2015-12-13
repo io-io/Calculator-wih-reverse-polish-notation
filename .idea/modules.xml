@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/Calculator wih reverse polish notation.iml" filepath="$PROJECT_DIR$/.idea/Calculator wih reverse polish notation.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/calc.iml" filepath="$PROJECT_DIR$/.idea/calc.iml" />
     </modules>
   </component>
 </project>

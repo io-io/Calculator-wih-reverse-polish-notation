@@ -1,4 +1,2 @@
  
- 
- 
-The result is: 169907538
+The result is: -2

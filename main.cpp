@@ -8,10 +8,7 @@
 #include <iostream>
 #include <fstream>
 #include <math.h>
-#include <cstddef>
 #include <iomanip>
-#include "IsNumber.h"
-
 
 using namespace std;
 
@@ -46,6 +43,14 @@ void pop(TemplateStack *&st, T &out) {
     st = inter;
 }
 
+bool IsNumber(char *Symbol) {
+    for (int i = 0; Symbol[i] != '\0'; i++) {
+        if (((Symbol[i] < '0') || (Symbol[i] > '9')) && (Symbol[i] != '.')) {
+            return false;
+        }
+    }
+    return true;
+}
 
 string postfix(string file, dict dictionary[]) {
     string out = "";//постфиксная запись хранится здесь
@@ -278,7 +283,6 @@ int calculate(string postfix, dict dictionary[]) {
     return out;
 }
 
-
 int main() {
     dict dictionary[30];
 
@@ -288,7 +292,7 @@ int main() {
         cout << "Enter variable " << dictionary[i].variable << ":";
         char inter;
         cin >> inter;
-        while (!(IsNumber::IsNumber(&inter))) {
+        while (!(IsNumber(&inter))) {
             cout << "Variable can get only integer value." << endl;
             cin >> inter;
         }
@@ -311,13 +315,6 @@ int main() {
         output << left;
         output << dictionary[i].value;
     }
-
-    output << " " << endl;
-    output << " " << endl;
     cout << post << endl;
-
     output << "The result is: " << calculate(post, dictionary);
-
-    //system("pause");
-
 }
